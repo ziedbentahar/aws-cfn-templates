@@ -45,7 +45,7 @@ Resources:
       FunctionName: !Sub ${Application}-${LambdaName}-lambda
       Code:
         S3Bucket: !Sub ${LambdaBucketName}
-        S3Key: !Sub${LambdaZipFile}
+        S3Key: !Sub ${LambdaZipFile}
       Handler: !Sub ${LambdaHandler}
       Role: !GetAtt LambdaExecutionRole.Arn
       Architectures:
