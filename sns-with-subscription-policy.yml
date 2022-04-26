@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'SNS Topic with queue prefix name subscription policy'
+
+Parameters:
+  TopicName:
+    Type: String
+  SubscriberQueuePrefix:
+    Type: String
+
+Resources:
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Ref TopicName
+      
+  SNSTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: !Sub ${TopicName}-policy
+        Version: '2012-10-17'
+        Statement:
+          Sid: !Sub ${TopicName}-policy-queue-sub
+          Effect: Allow
+          Principal:
+            AWS: "*"
+          Action: sns:Subscribe
+          Resource: !Ref Topic
+          Condition:
+            ArnLike:
+              AWS:SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${SubscriberQueuePrefix}*
+      Topics:
+        - !Ref Topic
+Outputs:
+  TopicArn: 
+    Description: SNS Topic
+    Value: !Ref Topic
+    Export: 
+      Name: !Sub ${AWS::StackName}-Topic

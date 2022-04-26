@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'SQS subscribed to sns'
+
+Parameters:
+  QueueName:
+    Type: String
+  TopicArn:
+    Type: String
+
+Resources:
+  Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref QueueName
+  
+  Subscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: "sqs"
+      TopicArn: !Ref TopicArn
+      Endpoint: !GetAtt Queue.Arn
+  
+  QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Id: MyDemoQueuePolicy
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Send_Permission
+            Effect: Allow
+            Principal:
+              AWS: '*'
+            Action:
+              - sqs:SendMessage
+            Resource: !GetAtt Queue.Arn
+            Condition:
+              ArnLike:
+                AWS:SourceArn: !Ref TopicArn
+      Queues:
+        - !Ref Queue
+
+Outputs:
+  QueueArn:
+    Description: SQS queue
+    Value: !Ref Queue
+    Export:
+      Name: !Sub ${AWS::StackName}-queue
+    
+  
+  
