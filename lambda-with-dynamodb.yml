@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Lambda with DynamoDb template'
+
+Parameters:
+  Application:
+    Type: String
+  TableName:
+    Type: String
+  LambdaName:
+    Type: String
+  LambdaHandler:
+    Type: String
+  LambdaBucketName:
+    Type: String
+  LambdaZipFile:
+    Type: String
+
+
+Resources:
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Application}-${TableName}
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+
+  
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: '/'
+      Policies:
+        - PolicyName: logs
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+        - PolicyName: ddb-access-policy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:BatchGetItem
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource: !GetAtt Table.Arn
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${Application}-${LambdaName}-lambda
+      Code:
+        S3Bucket: !Sub ${LambdaBucketName}
+        S3Key: !Sub ${LambdaZipFile}
+      Handler: !Sub ${LambdaHandler}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - arm64
+      Runtime: dotnet6
+      Timeout: 60
+      MemorySize: 512
+  
