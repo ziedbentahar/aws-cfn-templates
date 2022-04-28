@@ -78,7 +78,7 @@ Resources:
         PriceClass: PriceClass_All
         HttpVersion: http2
         IPV6Enabled: true
-        Comment: !Sub ${AWS::StackName}-Demo distribution with Lambda Function URL
+        Comment: !Sub ${AWS::StackName}-Distribution with Lambda Function URL
         Origins:
           - DomainName: !Select [0, !Split ["/",  !Select [1, !Split ["//", !GetAtt LambdaUrl.FunctionUrl]] ]] 
             Id: LambdaOrigin
