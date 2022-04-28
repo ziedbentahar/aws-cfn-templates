@@ -88,10 +88,11 @@ Resources:
         Enabled: 'true'
         DefaultCacheBehavior:
           TargetOriginId: LambdaOrigin
-          CachePolicyId: '658327ea-f89d-4fab-a63d-7e88639e58f6'
+          CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad'
           ViewerProtocolPolicy: redirect-to-https
           SmoothStreaming: 'false'
           Compress: 'true'
+          
   
   LambdaPermission:
     Type: AWS::Lambda::Permission
@@ -103,10 +104,10 @@ Resources:
 
 Outputs:
   LambdaFunctionUrl:
-    Description: domain name
+    Description: Lambda function Url
     Value: !GetAtt CloudFrontDistribution.DomainName
     Export:
-      Name: !Sub ${AWS::StackName}-domain-name
+      Name: !Sub ${AWS::StackName}-LambdaFunctionUrl
   
   
   
